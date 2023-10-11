@@ -1,0 +1,10 @@
+*.dll
+*.exe
+*.o
+.vs/
+Main/bin/
+Main/obj/
+
+
+MathLib/bin/
+MathLib/obj/
