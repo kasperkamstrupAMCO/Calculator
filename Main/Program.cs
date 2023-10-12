@@ -108,12 +108,15 @@ static void Addition()
 
 	/************ Variable Declarations ************/
 
-	double num1;
+	double	num1;
 	double	num2;
-	double	result;
 	int		temp		= 0;
 	int		sigfigs;
 	var		rawInput	= new string[2];
+	var		output		= new System.Text.StringBuilder();
+	
+
+
 
 	/************ Requests First usr Number ************/
 
@@ -131,7 +134,7 @@ static void Addition()
 		goto FirstNumber;
 	}
 
-	if (Regex.IsMatch(rawInput[0], @"[\D-[,\.]]"))
+	if (Regex.IsMatch(rawInput[0], @"[\D-[,\.-]]"))
 	{
 		Clear();
 		WriteLine("Hey! That's not allowed!!!\nType something different >:(\n");
@@ -152,8 +155,8 @@ static void Addition()
 	{
 		foreach (char character in rawInput[0].Reverse())
 		{
-			temp++;
 			if (character != '0') break;
+			temp++;
 		}
 	}
 
@@ -170,7 +173,7 @@ static void Addition()
 
 	/************ Validation of Second usr Number ************/
 
-	if (Regex.IsMatch(rawInput[1], @"[\D-[,\.]]"))
+	if (Regex.IsMatch(rawInput[1], @"[\D-[,\.-]]"))
 	{
 		Clear();
 		WriteLine("Hey! That's not allowed!!!\nType something different >:(\n");
@@ -193,8 +196,8 @@ static void Addition()
 	{
 		foreach (char character in rawInput[1].Reverse())
 		{
-			temp++;
 			if (character != '0') break;
+			temp++;
 		}
 	}
 
@@ -205,16 +208,50 @@ static void Addition()
 
 	try
 	{
-		num1 = Convert.ToDouble(rawInput[0]);
-		num2 = Convert.ToDouble(rawInput[1]);
-		result = MathLib.Basic.add(num1, num2);
-		WriteLine(result);
+		num1	= Convert.ToDouble(rawInput[0]);
+		num2	= Convert.ToDouble(rawInput[1]);
+
+		if (sigfigs < 0)
+		{
+			output.Append(MathLib.Basic.add(num1, num2).ToString($"N{Math.Abs(sigfigs)}"));
+			goto FinalResult;
+		}
+		else
+		{
+			output.Append(MathLib.Basic.add(num1, num2).ToString($"N0"));
+		}
+
+		
 	}
 	catch (FormatException e)
 	{
 		WriteLine($"Argument could not cast to a double, try a different format.\n\nError message: {e.Message}");
+		ReadLine();
+		return;
 	}
-	
+
+
+	if (sigfigs > 0)
+	{
+		for (int i = output.Length - 1; i >= 0; i--)
+		{
+			if (sigfigs <= 0)	  break;
+			if (output[i] == ',') continue;
+
+			sigfigs--;
+			output.Remove(i, 1).Insert(i, '0');
+		}
+	}
+
+FinalResult:
+	if (!Regex.IsMatch(output.ToString(), @"[\d-[0]]") & output[0] == '-')
+	{
+		output.Remove(0, 1);
+	}
+
+	Write("Result        >>: ");
+	WriteLine(output);
+
 	ReadLine();
 }
 static void Subtraction()
