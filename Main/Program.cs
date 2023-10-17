@@ -1,5 +1,7 @@
 ﻿using MathLib;
 using System.Reflection.PortableExecutable;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 
 string[] menuOptions = {$"\tAddition",
@@ -103,103 +105,25 @@ static void menuPrinter(ref string[] optionStrings, int selection)
 }
 static void Addition()
 {
+	/************ Variable Declarations ************/
+	double	 num1;
+	double	 num2;
+	int		 temp;
+	int		 sigfigs;
+	string[] rawInput;
+	var		 output	= new System.Text.StringBuilder();
+
+Top:
 	Clear();
 
 
-	/************ Variable Declarations ************/
-
-	double	num1;
-	double	num2;
-	int		temp		= 0;
-	int		sigfigs;
-	var		rawInput	= new string[2];
-	var		output		= new System.Text.StringBuilder();
-	
-
-
-
-	/************ Requests First usr Number ************/
-
-	FirstNumber:
-	WriteLine("You've chosen addition! Please type the numbers you wish to add.\n\n");
-	Write("First number  >>: ");
-	rawInput[0] = ReadLine();
-
-	/************ Validation of First usr Number ************/
-
-	if (rawInput[0] == "")
-	{
-		Clear();
-		WriteLine("You didn't type anything >:(");
-		goto FirstNumber;
-	}
-
-	if (Regex.IsMatch(rawInput[0], @"[\D-[,\.-]]"))
-	{
-		Clear();
-		WriteLine("Hey! That's not allowed!!!\nType something different >:(\n");
-		goto FirstNumber;
-	}
+	rawInput = basicOpInterface("Addition");
 
 	/************ Counts Significant Figures ************/
 
-	if (rawInput[0].Contains('.'))
-	{
-		foreach (char character in rawInput[0].Reverse())
-		{
-			if (character == '.') break;
-			temp--;
-		}
-	} 
-	else 
-	{
-		foreach (char character in rawInput[0].Reverse())
-		{
-			if (character != '0') break;
-			temp++;
-		}
-	}
+	sigfigs = getLeastSignificantPlace(rawInput[0]);
 
-	sigfigs = temp;
-	temp	= 0;
-
-
-	/************ Requests Second usr Number ************/
-
-	SecondNumber:
-	WriteLine("                +");
-	Write("Second Number >>: ");
-	rawInput[1] = ReadLine();
-
-	/************ Validation of Second usr Number ************/
-
-	if (Regex.IsMatch(rawInput[1], @"[\D-[,\.-]]"))
-	{
-		Clear();
-		WriteLine("Hey! That's not allowed!!!\nType something different >:(\n");
-		WriteLine("You've chosen addition! Please type the numbers you wish to add.\n\n");
-		WriteLine($"First number  >>: {rawInput[0]}");
-		goto SecondNumber;
-	}
-
-	/************ Counts Significant Figures ************/
-
-	if (rawInput[1].Contains('.'))
-	{
-		foreach (char character in rawInput[1].Reverse())
-		{
-			if (character == '.') break;
-			temp--;
-		}
-	}
-	else
-	{
-		foreach (char character in rawInput[1].Reverse())
-		{
-			if (character != '0') break;
-			temp++;
-		}
-	}
+	temp = getLeastSignificantPlace(rawInput[1]);
 
 	if (temp > sigfigs) sigfigs = temp;
 
@@ -213,21 +137,19 @@ static void Addition()
 
 		if (sigfigs < 0)
 		{
-			output.Append(MathLib.Basic.add(num1, num2).ToString($"N{Math.Abs(sigfigs)}"));
+			output.Append(Basic.add(num1, num2).ToString($"N{Math.Abs(sigfigs)}"));
 			goto FinalResult;
 		}
 		else
 		{
-			output.Append(MathLib.Basic.add(num1, num2).ToString($"N0"));
+			output.Append(Basic.add(num1, num2).ToString($"N0"));
 		}
-
-		
 	}
 	catch (FormatException e)
 	{
 		WriteLine($"Argument could not cast to a double, try a different format.\n\nError message: {e.Message}");
 		ReadLine();
-		return;
+		goto Top;
 	}
 
 
@@ -244,29 +166,190 @@ static void Addition()
 	}
 
 FinalResult:
-	if (!Regex.IsMatch(output.ToString(), @"[\d-[0]]") & output[0] == '-')
-	{
-		output.Remove(0, 1);
-	}
-
-	Write("Result        >>: ");
-	WriteLine(output);
-
-	ReadLine();
+	displayResult(ref output);
 }
 static void Subtraction()
 {
-	WriteLine($@"		!!!!! NOT YET IMPLEMENTED !!!!!");
-	ReadLine();
+	/************ Variable Declarations ************/
+	double num1;
+	double num2;
+	int temp;
+	int sigfigs;
+	string[] rawInput;
+	var output = new System.Text.StringBuilder();
+
+Top:
+	Clear();
+
+	rawInput = basicOpInterface("Subtraction");
+
+	/************ Counts Significant Figures ************/
+
+	sigfigs = getLeastSignificantPlace(rawInput[0]);
+
+	temp = getLeastSignificantPlace(rawInput[1]);
+
+	if (temp > sigfigs) sigfigs = temp;
+
+	/************ Tries to cast usr nums to double, then adds ************/
+
+	try
+	{
+		num1 = Convert.ToDouble(rawInput[0]);
+		num2 = Convert.ToDouble(rawInput[1]);
+
+		if (sigfigs < 0)
+		{
+			output.Append(Basic.subtract(num1, num2).ToString($"N{Math.Abs(sigfigs)}"));
+			goto FinalResult;
+		}
+		else
+		{
+			output.Append(Basic.subtract(num1, num2).ToString($"N0"));
+		}
+
+
+	}
+	catch (FormatException e)
+	{
+		WriteLine($"Argument could not cast to a double, try a different format.\n\nError message: {e.Message}");
+		ReadLine();
+		goto Top;
+	}
+
+
+	if (sigfigs > 0)
+	{
+		for (int i = output.Length - 1; i >= 0; i--)
+		{
+			if (sigfigs <= 0) break;
+			if (output[i] == ',') continue;
+
+			sigfigs--;
+			output.Remove(i, 1).Insert(i, '0');
+		}
+	}
+
+FinalResult:
+	displayResult(ref output);
 }
 static void Multiplication()
 {
-	WriteLine($@"		!!!!! NOT YET IMPLEMENTED !!!!!");
-	ReadLine();
+	/************ Variable Declarations ************/
+	double num1;
+	double num2;
+	int temp;
+	int sigfigs;
+	string[] rawInput;
+	var output = new System.Text.StringBuilder();
+
+Top:
+	Clear();
+
+	WriteLine("!!!!!!BUG: 1 * -1 = 0");
+
+	rawInput = basicOpInterface("Multiplication");
+
+
+	sigfigs = getNumberOfSigFigs(rawInput[0]);
+	temp	= getNumberOfSigFigs(rawInput[1]);
+
+	if (temp < sigfigs) sigfigs = temp;
+
+
+	try
+	{
+		num1 = Convert.ToDouble(rawInput[0]);
+		num2 = Convert.ToDouble(rawInput[1]);
+
+		output.Append(Basic.multiply(num1, num2).ToString($"N"));
+	}
+	catch (FormatException e)
+	{
+		WriteLine($"Argument could not cast to a double, try a different format.\n\nError message: {e.Message}");
+		ReadLine();
+		goto Top;
+	}
+
+	bool decimalReached = false;
+
+	for (int i = 0; i < output.Length; i++)
+	{
+		if (sigfigs > 0)
+		{
+			if (output[i] == ',' || output[i] == '.') continue;
+			sigfigs--;
+			continue;
+		}
+		if (decimalReached)
+		{
+			output[i] = '\0';
+			continue;
+		}
+		if (output[i] == '.')
+		{
+			decimalReached = true;
+			output[i] = '\0';
+			continue;
+		}
+		if (output[i] == ',') continue;
+		output[i] = '0';
+	}
+
+//FinalResult:
+	displayResult(ref output);
 }
 static void Division()
 {
 	WriteLine($@"		!!!!! NOT YET IMPLEMENTED !!!!!");
+	ReadLine();
+}
+static string[] basicOpInterface(string opName)
+{
+	/************ Variable Declarations ************/
+	var		  rawInput = new string[2];
+	ErrorCode error;
+
+
+	WriteLine($"You've chosen {opName}! Please type the input numbers.\n\n");
+
+	/************ Requests User Input ************/
+
+	
+	string getInput(string prompt)
+	{
+		string? input;
+		do
+		{
+			Write(prompt);
+			input = ReadLine();
+
+			error = validateNumberInputEnum(input!);
+
+			if (error == ErrorCode.EmptyInput) WriteLine("Please type something\n");
+			if (error == ErrorCode.IllegalCharacter) WriteLine("Illegal character\n");
+
+		} while (error != ErrorCode.NoError);
+
+		return input!;
+	}
+
+	rawInput[0] = getInput("First number  >>: ");
+	rawInput[1] = getInput("Second number >>: ");
+
+	return rawInput;
+}
+static void displayResult(ref StringBuilder result)
+{
+	// This guard clause removes the minus sign from 0 when the result is -0.
+	if (!Regex.IsMatch(result.ToString(), @"[\d-[0]]") & result[0] == '-')
+	{
+		result.Remove(0, 1);
+	}
+
+	Write("Result        >>: ");
+	WriteLine(result);
+
 	ReadLine();
 }
 static void Exponentiation()

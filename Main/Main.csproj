@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<Using Include="System.Console" Static="true"/>
+		<Using Include="MathLib.Helpers" Static="true"/>
 	</ItemGroup>
 
 	<ItemGroup>
